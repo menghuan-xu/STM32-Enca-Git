@@ -47,6 +47,10 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
     Core/APP/Key/button.c
     Core/APP/LED/led.c
+    Core/APP/EC11/ec11.c
+    Core/APP/oled/oled.c
+    Core/APP/oled/font.c
+    Core/APP/oled/image.c
 )
 
 # Add include paths
@@ -54,6 +58,8 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined include paths
     Core/APP/Key
     Core/APP/LED
+    Core/APP/EC11
+    Core/APP/oled
 )
 
 # Add project symbols (macros)

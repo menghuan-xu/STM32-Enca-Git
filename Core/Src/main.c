@@ -18,13 +18,20 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "i2c.h"
+#include "stm32f103xb.h"
+#include "stm32f1xx_hal_tim.h"
+#include "tim.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "button.h"
 #include "led.h"
-#include "stm32f1xx_hal_gpio.h"
+#include "ec11.h"
+#include "oled.h"
+#include <string.h>
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -88,31 +95,40 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_I2C1_Init();
+  MX_TIM1_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
-  LED_Object led1, led2;
-  Button_t button1;
-  uint32_t last_led_toggle_tick = HAL_GetTick();
+  EC11_t ec11;
+  EC11_Init(&ec11, &htim1, 0, 100);
 
-  Button_Init(&button1, GPIOB, GPIO_PIN_15, 0); //
-  LED_Init(&led1, GPIOA, GPIO_PIN_3, LED_ACTIVE_HIGH);
-  LED_Init(&led2, GPIOA, GPIO_PIN_2, LED_ACTIVE_HIGH);
+  Button_t ec11_key;
+  Button_Init(&ec11_key, GPIOB, GPIO_PIN_15,0);
+
+  OLED_Init();
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+
+  char message[20] = "";
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    BtnEvent_t button1_event = Button_GetEvent(&button1);
-
-    if(button1_event == BTN_EVENT_CLICK) 
+    BtnEvent_t ec11_key_event = Button_GetEvent(&ec11_key);
+    if(ec11_key_event == BTN_EVENT_CLICK)
     {
-      led2.toggle(&led2);
+      EC11_SetValue(&ec11, ec11.min_value);
     }
+    uint16_t count = EC11_GetValue(&ec11);
+    sprintf(message, "Count: %d", count);
+    OLED_Clear();
+    OLED_DrawString(32,32, message,FONT_8X8,1);
+    OLED_Update();
 
-    if ((HAL_GetTick() - last_led_toggle_tick) >= 500U) {
-      last_led_toggle_tick = HAL_GetTick();
-      led1.toggle(&led1);
-    }
+    __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, count);
+
+    HAL_Delay(8);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
