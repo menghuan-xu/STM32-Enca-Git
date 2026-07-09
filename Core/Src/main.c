@@ -22,7 +22,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "button.h"
+#include "led.h"
+#include "stm32f1xx_hal_gpio.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -87,13 +89,30 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
+  LED_Object led1, led2;
+  Button_t button1;
+  uint32_t last_led_toggle_tick = HAL_GetTick();
 
+  Button_Init(&button1, GPIOB, GPIO_PIN_15, 0); //
+  LED_Init(&led1, GPIOA, GPIO_PIN_3, LED_ACTIVE_HIGH);
+  LED_Init(&led2, GPIOA, GPIO_PIN_2, LED_ACTIVE_HIGH);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    BtnEvent_t button1_event = Button_GetEvent(&button1);
+
+    if(button1_event == BTN_EVENT_CLICK) 
+    {
+      led2.toggle(&led2);
+    }
+
+    if ((HAL_GetTick() - last_led_toggle_tick) >= 500U) {
+      last_led_toggle_tick = HAL_GetTick();
+      led1.toggle(&led1);
+    }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

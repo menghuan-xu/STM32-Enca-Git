@@ -1,0 +1,39 @@
+build
+mx.scratch
+!.settings
+
+# CubeMX缓存与备份
+*.ioc.backup
+cubemx.log
+.MXproject/
+
+# 编译输出文件夹
+Debug/
+Release/
+build/
+Output/
+
+# 固件编译产物
+*.axf
+*.elf
+*.bin
+*.hex
+*.map
+*.o
+*.d
+*.su
+*.lst
+*.siz
+
+# IDE临时文件
+.idea/
+.vscode/
+*.uvoptx
+*.uvgui*
+*.bak
+
+# 系统垃圾
+Thumbs.db
+.DS_Store
+*.tmp
+*.log

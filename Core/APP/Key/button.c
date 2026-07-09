@@ -1,5 +1,5 @@
 #include "button.h"
-
+#include "stm32f1xx_hal_gpio.h"
 
 #define DEBOUNCE_TIME_MS  20   // 消抖时间
 #define LONG_PRESS_TIME_MS 500 // 长按阈值
@@ -48,6 +48,10 @@ BtnEvent_t  Button_GetEvent(Button_t* btn) {
 
     switch (btn->state) {
         case KEY_STATE_IDLE:
+            if (is_pressed) {
+                btn->last_tick = now;
+                btn->state = KEY_STATE_DEBOUNCE;
+            }
             break;
 
         case KEY_STATE_DEBOUNCE:
@@ -104,7 +108,7 @@ BtnEvent_t  Button_GetEvent(Button_t* btn) {
  * @note   此函数应在 HAL_GPIO_EXTI_Callback 中调用，实现中断分发
  * @note   函数名中的 EXIT 应为 EXTI（外部中断），建议更正为 Button_EXTI_Callback
  */
-void Button_EXIT_Callback(uint16_t GPIO_Pin){
+void Button_EXTI_Callback(uint16_t GPIO_Pin){
     uint32_t now = HAL_GetTick();           // 获取当前系统时间戳（ms）
     Button_t* it = g_btn_list;              // 从链表头开始遍历
     
@@ -117,4 +121,9 @@ void Button_EXIT_Callback(uint16_t GPIO_Pin){
         }
         it = it->next;                      // 移动到下一个按键节点
     }
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  Button_EXTI_Callback(GPIO_Pin);
 }
